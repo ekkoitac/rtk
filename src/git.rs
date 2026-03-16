@@ -1705,6 +1705,36 @@ A  added.rs
     }
 
     #[test]
+    fn test_format_status_modified_truncation() {
+        // Test that >15 modified files show "... +N more"
+        let mut porcelain = String::from("## main\n");
+        for i in 1..=20 {
+            porcelain.push_str(&format!(" M file{}.rs\n", i));
+        }
+        let result = format_status_output(&porcelain);
+        assert!(result.contains("📝 Modified: 20 files"));
+        assert!(result.contains("file1.rs"));
+        assert!(result.contains("file15.rs"));
+        assert!(result.contains("... +5 more"));
+        assert!(!result.contains("file16.rs"));
+    }
+
+    #[test]
+    fn test_format_status_untracked_truncation() {
+        // Test that >10 untracked files show "... +N more"
+        let mut porcelain = String::from("## main\n");
+        for i in 1..=15 {
+            porcelain.push_str(&format!("?? file{}.rs\n", i));
+        }
+        let result = format_status_output(&porcelain);
+        assert!(result.contains("❓ Untracked: 15 files"));
+        assert!(result.contains("file1.rs"));
+        assert!(result.contains("file10.rs"));
+        assert!(result.contains("... +5 more"));
+        assert!(!result.contains("file11.rs"));
+    }
+
+    #[test]
     fn test_run_passthrough_accepts_args() {
         // Test that run_passthrough compiles and has correct signature
         let _args: Vec<OsString> = vec![OsString::from("tag"), OsString::from("--list")];
