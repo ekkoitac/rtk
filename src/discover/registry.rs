@@ -1584,10 +1584,42 @@ mod tests {
             Classification::Supported {
                 rtk_equivalent: "rtk swift",
                 category: "Build",
-                estimated_savings_pct: 90.0,
+                estimated_savings_pct: 85.0,
                 status: RtkStatus::Existing,
             }
         ));
+    }
+
+    #[test]
+    fn test_classify_swiftlint() {
+        assert!(matches!(
+            classify_command("swiftlint"),
+            Classification::Supported {
+                rtk_equivalent: "rtk swiftlint",
+                category: "Lint",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn test_classify_swiftformat() {
+        assert!(matches!(
+            classify_command("swiftformat ."),
+            Classification::Supported {
+                rtk_equivalent: "rtk swiftformat",
+                category: "Lint",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn test_rewrite_swift_package() {
+        assert_eq!(
+            rewrite_command("swift package resolve", &[]),
+            Some("rtk swift package resolve".into())
+        );
     }
 
     #[test]

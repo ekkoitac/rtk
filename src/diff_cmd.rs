@@ -352,7 +352,11 @@ diff --git a/b.rs b/b.rs
         let result = compute_diff(&a_refs, &b_refs);
 
         // Should have ~167 changes (every 3rd line), all present
-        assert!(result.changes.len() > 100, "Expected 100+ changes, got {}", result.changes.len());
+        assert!(
+            result.changes.len() > 100,
+            "Expected 100+ changes, got {}",
+            result.changes.len()
+        );
         // No truncation — changes count matches what we generate
         assert!(!result.changes.is_empty());
     }

@@ -1,0 +1,38 @@
+[filters.swiftformat]
+description = "Compact swiftformat output — show changed files count"
+match_command = "^swiftformat\\b"
+strip_ansi = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Running SwiftFormat",
+  "^Reading config",
+  "^\\d+/\\d+ files",
+]
+match_output = [
+  { pattern = "0 files would have been changed", message = "ok (swiftformat: no changes needed)" },
+  { pattern = "SwiftFormat completed. 0/", message = "ok (swiftformat: no changes needed)" },
+]
+max_lines = 40
+on_empty = "ok (swiftformat: no output)"
+
+[[tests.swiftformat]]
+name = "no changes needed"
+input = """
+Running SwiftFormat...
+Reading config file at /Users/dev/App/.swiftformat
+0 files would have been changed out of 12 files inspected
+SwiftFormat completed. 0/12 files updated.
+"""
+expected = "ok (swiftformat: no changes needed)"
+
+[[tests.swiftformat]]
+name = "files changed"
+input = """
+Running SwiftFormat...
+Reading config file at /Users/dev/App/.swiftformat
+/Users/dev/App/ViewController.swift
+/Users/dev/App/Model.swift
+2 files would have been changed out of 12 files inspected
+SwiftFormat completed. 2/12 files updated.
+"""
+expected = "/Users/dev/App/ViewController.swift\n/Users/dev/App/Model.swift\n2 files would have been changed out of 12 files inspected\nSwiftFormat completed. 2/12 files updated."

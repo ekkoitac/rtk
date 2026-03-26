@@ -1,0 +1,44 @@
+[filters.swift-package]
+description = "Compact swift package output — strip Fetching/Resolving noise, show summary"
+match_command = "^swift\\s+package\\s+(resolve|update)\\b"
+strip_ansi = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Fetching ",
+  "^Fetched ",
+  "^Computing version ",
+  "^Creating working copy ",
+  "^Working copy of ",
+  "^Cloning ",
+]
+match_output = [
+  { pattern = "^Resolved", message = "ok (dependencies resolved)" },
+]
+max_lines = 30
+on_empty = "ok (swift package: no output)"
+
+[[tests.swift-package]]
+name = "resolve strips fetching noise"
+input = """
+Fetching https://github.com/apple/swift-argument-parser from cache
+Fetching https://github.com/apple/swift-log from cache
+Fetched https://github.com/apple/swift-argument-parser from cache (0.42s)
+Fetched https://github.com/apple/swift-log from cache (0.38s)
+Computing version for https://github.com/apple/swift-argument-parser
+Computed https://github.com/apple/swift-argument-parser at 1.3.0 (0.01s)
+Computing version for https://github.com/apple/swift-log
+Computed https://github.com/apple/swift-log at 1.5.4 (0.01s)
+Resolved
+"""
+expected = "ok (dependencies resolved)"
+
+[[tests.swift-package]]
+name = "update with new versions shows computed lines"
+input = """
+Fetching https://github.com/apple/swift-argument-parser
+Fetched https://github.com/apple/swift-argument-parser (1.23s)
+Computing version for https://github.com/apple/swift-argument-parser
+Computed https://github.com/apple/swift-argument-parser at 1.4.0 (0.02s)
+Updated https://github.com/apple/swift-argument-parser (1.3.0 -> 1.4.0)
+"""
+expected = "Computed https://github.com/apple/swift-argument-parser at 1.4.0 (0.02s)\nUpdated https://github.com/apple/swift-argument-parser (1.3.0 -> 1.4.0)"

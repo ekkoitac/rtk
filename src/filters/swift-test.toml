@@ -1,0 +1,60 @@
+[filters.swift-test]
+description = "Compact swift test output — strip passing tests, show failures and summary"
+match_command = "^swift\\s+test\\b"
+strip_ansi = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Compiling ",
+  "^Linking ",
+  "^Build complete!",
+  "^Test Case .* passed ",
+  "^Test Suite .* started at ",
+  "^Test Suite .* passed at ",
+]
+match_output = [
+  { pattern = "^Executed \\d+ tests?, with 0 failures", message = "ok (all tests passed)", unless = "warning:" },
+]
+max_lines = 60
+on_empty = "ok (swift test: no output)"
+
+[[tests.swift-test]]
+name = "all tests pass — short-circuit to ok"
+input = """
+Compiling MyApp MyApp.swift
+Linking MyAppTests
+Build complete!
+Test Suite 'All tests' started at 2026-03-10 12:00:00
+Test Suite 'MyAppTests' started at 2026-03-10 12:00:00
+Test Case '-[MyAppTests testAddition]' passed (0.001 seconds).
+Test Case '-[MyAppTests testSubtraction]' passed (0.002 seconds).
+Test Suite 'MyAppTests' passed at 2026-03-10 12:00:01
+Executed 2 tests, with 0 failures in 0.003 seconds
+"""
+expected = "ok (all tests passed)"
+
+[[tests.swift-test]]
+name = "test failures shown with summary"
+input = """
+Compiling MyApp MyApp.swift
+Linking MyAppTests
+Build complete!
+Test Suite 'All tests' started at 2026-03-10 12:00:00
+Test Suite 'MyAppTests' started at 2026-03-10 12:00:00
+Test Case '-[MyAppTests testAddition]' passed (0.001 seconds).
+Test Case '-[MyAppTests testFailing]' failed (0.002 seconds).
+/Users/dev/MyApp/Tests/MyAppTests.swift:15: error: -[MyAppTests testFailing] : XCTAssertEqual failed: ("1") is not equal to ("2")
+Test Suite 'MyAppTests' failed at 2026-03-10 12:00:01
+Executed 2 tests, with 1 failure in 0.003 seconds
+"""
+expected = "Test Case '-[MyAppTests testFailing]' failed (0.002 seconds).\n/Users/dev/MyApp/Tests/MyAppTests.swift:15: error: -[MyAppTests testFailing] : XCTAssertEqual failed: (\"1\") is not equal to (\"2\")\nTest Suite 'MyAppTests' failed at 2026-03-10 12:00:01\nExecuted 2 tests, with 1 failure in 0.003 seconds"
+
+[[tests.swift-test]]
+name = "compile error before tests"
+input = """
+Compiling MyApp MyApp.swift
+/Users/dev/MyApp/Sources/MyApp/main.swift:5:1: error: use of unresolved identifier 'foo'
+foo()
+^~~
+error: build had 1 command failure
+"""
+expected = "/Users/dev/MyApp/Sources/MyApp/main.swift:5:1: error: use of unresolved identifier 'foo'\nfoo()\n^~~\nerror: build had 1 command failure"

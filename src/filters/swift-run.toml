@@ -1,0 +1,34 @@
+[filters.swift-run]
+description = "Compact swift run output — strip build noise, show application output"
+match_command = "^swift\\s+run\\b"
+strip_ansi = true
+strip_lines_matching = [
+  "^\\s*$",
+  "^Compiling ",
+  "^Linking ",
+  "^Build complete!",
+]
+max_lines = 80
+on_empty = "ok (swift run: no output)"
+
+[[tests.swift-run]]
+name = "strips build noise, keeps app output"
+input = """
+Compiling MyApp main.swift
+Compiling MyApp Config.swift
+Linking MyApp
+Build complete!
+Hello, World!
+Processing 42 items...
+Done.
+"""
+expected = "Hello, World!\nProcessing 42 items...\nDone."
+
+[[tests.swift-run]]
+name = "build error passes through"
+input = """
+Compiling MyApp main.swift
+/Users/dev/MyApp/Sources/main.swift:3:5: error: cannot find 'foo' in scope
+error: build had 1 command failure
+"""
+expected = "/Users/dev/MyApp/Sources/main.swift:3:5: error: cannot find 'foo' in scope\nerror: build had 1 command failure"
