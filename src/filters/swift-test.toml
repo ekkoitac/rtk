@@ -7,12 +7,21 @@ strip_lines_matching = [
   "^Compiling ",
   "^Linking ",
   "^Build complete!",
+  "^\\[\\d+/\\d+\\] ",
+  "^Building for ",
+  "^Build of product ",
   "^Test Case .* passed ",
+  "^Test Case .* started\\.",
   "^Test Suite .* started at ",
   "^Test Suite .* passed at ",
+  "^\\t\\s*Executed \\d+ tests?, with 0 failures",
+  "^. Test run started",
+  "^. Testing Library",
+  "^. Test run with 0 tests",
 ]
 match_output = [
-  { pattern = "^Executed \\d+ tests?, with 0 failures", message = "ok (all tests passed)", unless = "warning:" },
+  { pattern = "^Executed \\d+ tests?, with 0 failures", message = "ok (all tests passed)", unless = "warning:|error:" },
+  { pattern = "Executed \\d+ tests?, with 0 failures", message = "ok (all tests passed)", unless = "warning:|error:" },
 ]
 max_lines = 60
 on_empty = "ok (swift test: no output)"

@@ -7,6 +7,9 @@ strip_lines_matching = [
   "^Compiling ",
   "^Linking ",
   "^Build complete!",
+  "^\\[\\d+/\\d+\\] ",
+  "^Building for ",
+  "^Build of product ",
 ]
 max_lines = 80
 on_empty = "ok (swift run: no output)"
