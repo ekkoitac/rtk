@@ -1951,13 +1951,24 @@ mod tests {
     }
 
     /// Regression #1217: remote branch refs must not be treated as paths.
-    /// `origin/master` is a valid git ref — no `--` injection.
+    /// Skips gracefully when the remote ref is not available (shallow CI clones).
     #[test]
     fn test_normalize_diff_args_no_injection_for_remote_ref() {
-        // origin/master contains `/` but is a valid ref in this repo.
+        // Probe whether origin/master is reachable in this checkout.
+        // CI often uses shallow clones without all remote tracking refs.
+        let has_ref = std::process::Command::new("git")
+            .args(["rev-parse", "--verify", "--quiet", "origin/master"])
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+
+        if !has_ref {
+            // Ref not available in this environment — skip rather than false-fail.
+            return;
+        }
+
         let args = vec!["origin/master".to_string()];
         let normalized = normalize_diff_args(&args, &[]);
-        // git rev-parse --verify origin/master succeeds → no injection
         assert_eq!(normalized, args, "origin/master is a ref, not a path");
     }
 
